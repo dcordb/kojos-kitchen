@@ -65,20 +65,16 @@ def simulation_two_employees():
     next_arrival = gen_exp(LAMBDA_REGULAR)  #time of next arrival
 
     while True:
-        logger.info(f'Cur time = {min(next_arrival, t_out_1, t_out_2):.5f} (in mins)')
+        cur_time = min(next_arrival, t_out_1, t_out_2)
 
-        if next_arrival > T:
-            next_arrival = INFINITY
+        logger.info(f'Cur time = {cur_time:.5f} (in mins)')
 
-        if next_arrival != INFINITY and next_arrival == min(next_arrival, t_out_1, t_out_2):
-            #new arrival, it is valid only if its time is <= T
-
+        if next_arrival != INFINITY and next_arrival == cur_time:
             t = next_arrival
             food_wants.append(random.randint(0, 1))
-            
-            arrivals += 1
             t_in.append(t)
             t_out.append(0)
+            arrivals += 1
 
             f = food_wants[arrivals]
 
@@ -120,9 +116,10 @@ def simulation_two_employees():
                 logger.info(f'Using regular lambda, '
                 f'next arrival will ocurr at time = {next_arrival:.5f}')
 
-        elif t_out_1 != INFINITY and t_out_1 == min(next_arrival, t_out_1, t_out_2):
-            # notice first part of if checks when kitchen closed and there are still people left
+            if next_arrival > T:
+                next_arrival = INFINITY
 
+        elif t_out_1 != INFINITY and t_out_1 == cur_time:
             first_empl_req += 1
             t = t_out_1
             t_out[who_first] = t
@@ -140,15 +137,10 @@ def simulation_two_employees():
                 f = food_wants[who_first]
                 t_out_1 = t + random.uniform(FOOD_TIMES[f][0], FOOD_TIMES[f][1])
 
-            # please notice here that if who_first == 0 it indicates that there is no-one to add
-            # to start processing, also t_out_1 == INFINITY
-
             logger.debug(f'The order of client #{who_first} will start to being processed, '
                 f'it will be finished at time = {t_out_1:.5f}')
 
-        elif t_out_2 != INFINITY and t_out_2 == min(next_arrival, t_out_1, t_out_2):
-            # notice first part of if checks when kitchen closed and there are still people left
-
+        elif t_out_2 != INFINITY and t_out_2 == cur_time:
             second_empl_req += 1
             t = t_out_2
             t_out[who_second] = t
@@ -165,9 +157,6 @@ def simulation_two_employees():
             else:
                 f = food_wants[who_second]
                 t_out_2 = t + random.uniform(FOOD_TIMES[f][0], FOOD_TIMES[f][1])
-
-            # please notice here that if who_second == 0 it indicates that there is no-one to add
-            # to start processing, also t_out_2 == INFINITY
 
             logger.debug(f'The order of client #{who_second} will start to being processed, '
                 f'it will be finished at time = {t_out_2:.5f}')
