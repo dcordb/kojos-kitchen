@@ -144,30 +144,6 @@ Github: \href{https://github.com/dcordb/kojos-kitchen/}{https://github.com/dcord
         El tiempo que un cliente $i$ tuvo que esperar hasta recibir su comida es de \texttt{t\_out[i]} - \texttt{t\_in[i]}, queremos en cada simulación
         hallar el porciento de clientes cuyo tiempo de espera es mayor que 5 minutos.
 
-    % \section*{Pseudocódigo}
-    %     \begin{allintypewriter}
-    %         \begin{algorithmic}[1]
-    %             \While{True}
-    %                 \State cur\_time = $\min$(next\_arrival, t\_out\_1, t\_out\_2, t\_out\_3)
-
-    %                 \If{next\_arrival $\neq$ inf \textbf{and} next\_arrival = cur\_time}
-    %                     \State t $\gets$ next\_arrival
-    %                     \State gen food preference
-    %                     \State t\_in $\gets$ t\_in + t \Comment {esto es concatenación}
-    %                     \State arrivals $\gets$ arrivals + 1
-
-    %                     \If {who\_first = 0}
-    %                         \State n $\gets$ n + 1
-    %                         \State who\_first $\gets$ arrivals
-    %                         \State t\_out\_1 $\gets$ t + $T_i$ \Comment{$T_i$ es el tiempo que el empleado tarda}
-    %                     \EndIf
-
-    %                     \Else
-    %                 \EndIf
-    %             \EndWhile
-    %         \end{algorithmic}
-    %     \end{allintypewriter}
-
     \section*{Consideraciones Obtenidas}
         Luego de correr varias simulaciones variando los parámetros \texttt{LAMBDA\_REGULAR} y \texttt{LAMBDA\_BUSY} se obtuvieron los siguientes resultados:
 
@@ -191,4 +167,135 @@ Github: \href{https://github.com/dcordb/kojos-kitchen/}{https://github.com/dcord
         Para más detalles sobre el modelo, realizar simulaciones con otros parámetros lambda y ver el código que lo implementa dirigirse al repo de GitHub:
 
         \href{https://github.com/dcordb/kojos-kitchen/}{https://github.com/dcordb/kojos-kitchen/}
+
+        \section*{Pseudocódigo}
+        \begin{allintypewriter}
+            \begin{algorithmic}[1]
+                \Function{KojosKitchen}{use\_extra\_employee}
+                    \While{True}
+                        \State cur\_time = $\min$(next\_arrival, t\_out\_1, t\_out\_2, t\_out\_3)
+                        % \[\]
+
+                        \If{next\_arrival $\neq$ inf \textbf{and} next\_arrival = cur\_time}
+                            \State t $\gets$ next\_arrival
+                            \State gen food preference
+                            \State t\_in $\gets$ t\_in + t \Comment {esto es concatenación}
+                            \State arrivals $\gets$ arrivals + 1
+                            % \[\]
+
+                            \If {who\_first = 0}
+                                \State n $\gets$ n + 1
+                                \State who\_first $\gets$ arrivals
+                                \State t\_out\_1 $\gets$ t + $T_i$ \Comment{$T_i$ es el tiempo que el empleado tarda}
+
+                            % \[\]
+                            \ElsIf{who\_second = 0}
+                                \State n $\gets$ n + 1
+                                \State who\_second $\gets$ arrivals
+                                \State t\_out\_2 $\gets$ t + $T_i$ \Comment{$T_i$ es el tiempo que el empleado tarda}
+                            
+                            % \[\]
+                            \ElsIf{use\_extra\_employee \textbf{and} in\_busy\_hours(t) \textbf{and} who\_third = 0}
+                                \State n $\gets$ n + 1
+                                \State who\_third $\gets$ arrivals
+                                \State t\_out\_3 $\gets$ t + $T_i$ \Comment{$T_i$ es el tiempo que el empleado tarda}
+                            
+                            % \[\]
+                            \Else
+                                \Comment{Cliente debe esperar en la cola}
+                                \State \textbf{pass}
+                            \EndIf
+                            % \[\]
+
+                            \If{in\_busy\_hours(t)}
+                                \State next\_arrival $\gets$ t + $G_{busy}$ \Comment{$G_{busy}$ es una exponencial generada con LAMBDA\_BUSY}
+                            \Else
+                                \State next\_arrival $\gets$ t + $G_{reg}$ \Comment{$G_{reg}$ es una exponencial generada con LAMBDA\_REGULAR}
+                            \EndIf
+                            
+                            % \[\]
+
+                            \If{next\_arrival $>$ T} \Comment{El nuevo cliente llega luego de cerrar la cocina}
+                                \State next\_arrival $\gets$ inf
+                            \EndIf
+
+                        % \[\]
+                        \ElsIf{t\_out\_1 $\neq$ inf \textbf{and} t\_out\_1 = cur\_time}
+                            \State first\_empl\_req $\gets$ first\_empl\_req + 1
+                            \State t $\gets$ t\_out\_1
+                            \State t\_out[who\_first] = t
+
+                            \State n $\gets$ n - 1
+                            \State next\_guy $\gets$ $\max$(who\_first, who\_second, who\_third) + 1
+                            \State who\_first $\gets$ 0 
+
+                            \If{next\_guy $\leq$ arrivals}
+                                \State who\_first $\gets$ next\_guy
+                            \EndIf
+
+                            \If{who\_first = 0}
+                                \State t\_out\_1 $\gets$ inf
+
+                            \Else
+                                \State t\_out\_1 $\gets$ t + $T_i$ \Comment{$T_i$ es el tiempo que el empleado tarda}
+                            \EndIf
+
+                            % \[\]
+                        \ElsIf{t\_out\_2 $\neq$ inf \textbf{and} t\_out\_2 = cur\_time}
+                            \State second\_empl\_req $\gets$ second\_empl\_req + 1
+                            \State t $\gets$ t\_out\_2
+                            \State t\_out[who\_second] = t
+
+                            \State n $\gets$ n - 1
+                            \State next\_guy $\gets$ $\max$(who\_first, who\_second, who\_third) + 1
+                            \State who\_second $\gets$ 0 
+
+                            \If{next\_guy $\leq$ arrivals}
+                                \State who\_second $\gets$ next\_guy
+                            \EndIf
+
+                            \If{who\_second = 0}
+                                \State t\_out\_2 $\gets$ inf
+
+                            \Else
+                                \State t\_out\_2 $\gets$ t + $T_i$ \Comment{$T_i$ es el tiempo que el empleado tarda}
+                            \EndIf
+
+                            % \[\]
+                        \ElsIf{use\_extra\_employee \textbf{and} t\_out\_3 $\neq$ inf \textbf{and} t\_out\_3 = cur\_time}
+                            \State third\_empl\_req $\gets$ third\_empl\_req + 1
+                            \State t $\gets$ t\_out\_3
+                            \State t\_out[who\_third] = t
+
+                            \State n $\gets$ n - 1
+                            \State next\_guy $\gets$ $\max$(who\_first, who\_second, who\_third) + 1
+                            \State who\_third $\gets$ 0 
+
+                            \If{next\_guy $\leq$ arrivals}
+                                \State who\_third $\gets$ next\_guy
+                            \EndIf
+
+                            \If{who\_third = 0}
+                                \State t\_out\_3 $\gets$ inf
+
+                            \Else
+                                \State t\_out\_3 $\gets$ t + $T_i$ \Comment{$T_i$ es el tiempo que el empleado tarda}
+                            \EndIf
+                            % \[\]
+                        \Else
+                            \State \textbf{break}
+                        \EndIf
+                    \EndWhile
+
+                    \State cnt $\gets$ 0
+                    \ForAll{$1 \leq i \leq $ arrivals}
+                        \If {t\_out[i] - t\_in[i] $>$ 5}
+                            \State cnt $\gets$ cnt + 1
+                        \EndIf
+                    \EndFor
+
+                    \State \textbf{return} cnt * 100 / arrivals
+                \EndFunction
+            \end{algorithmic}
+        \end{allintypewriter}
 \end{document}
