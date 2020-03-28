@@ -9,13 +9,15 @@
 \usepackage[margin = 0.75in]{geometry}
 \usepackage{parskip}
 \usepackage{enumitem}
+\usepackage{booktabs}
 
 % \usepackage{minted}
 
 \usepackage{sectsty}
 \allsectionsfont{\normalfont\sffamily}
 
-\author{Daniel E. Cordovés Borroto \\ \\ Email: \href{mailto:daniel.cordovesb@estudiantes.matcom.uh.cu}{daniel.cordovesb@estudiantes.matcom.uh.cu}}
+\author{Daniel E. Cordovés Borroto C411 \\ \\ Email: \href{mailto:daniel.cordovesb@estudiantes.matcom.uh.cu}{daniel.cordovesb@estudiantes.matcom.uh.cu} \\ \\
+Github: \href{https://github.com/dcordb/kojos-kitchen/}{https://github.com/dcordb/kojos-kitchen/} }
 \title{Kojo's Kitchen}
 
 \begin{document}
@@ -40,7 +42,7 @@
 
         Actualmente dos empleados trabajan todo el dı́a preparando sándwiches y
         sushi para los consumidores. El tiempo de preparación depende del producto en
-        1cuestión. Estos distribuyen de forma uniforme, en un rango de 3 a 5 minutos
+        cuestión. Estos distribuyen de forma uniforme, en un rango de 3 a 5 minutos
         para la preparación de sándwiches y entre 5 y 8 minutos para la preparación de
         sushi.
 
@@ -73,7 +75,7 @@
         Estado del sistema:
 
         \begin{itemize}[label=\textbullet]
-            \item \texttt{n}: número de personas en el sistema (procesándose)
+            \item \texttt{n}: número de personas en el sistema
             \item \texttt{who\_first}: número de cliente que está siendo atendido por el empleado 1 (0 indica que no hay cliente siendo atendido)
             \item \texttt{who\_second}: número de cliente está siendo atendido por el empleado 2 (0 indica que no hay cliente siendo atendido)
             \item \texttt{who\_third}: número de cliente está siendo atendido por el empleado 3 (0 indica que no hay cliente siendo atendido)
@@ -120,7 +122,7 @@
         \end{itemize}
 
         Las llegadas de un nuevo cliente se realizan de la siguiente forma: se genera una variable con distribución exponencial
-        que denota que a partir del tiempo actual (\texttt{t}) entra un nuevo cliente en G minutos (el tiempo de entrada sería \texttt{t + G}),
+        que denota que a partir del tiempo actual (\texttt{t}) entra un nuevo cliente en G minutos (el tiempo de entrada sería \texttt{t + G} minutos),
         donde \texttt{G} es la variable generada.
 
         Como hay intervalos de tiempo de hora pico e intervalos de tiempo regulares se tienen dos lambdas distintos para generar
@@ -129,6 +131,8 @@
                 \item \texttt{LAMBDA\_REGULAR} (lambda a usar en intervalos regulares)
                 \item \texttt{LAMDA\_BUSY} (lambda a usar en intervalos de hora pico)
             \end{itemize}
+
+        Por supuesto estos lambdas cumplen que \texttt{LAMBDA\_BUSY} > \texttt{LAMBDA\_REGULAR}.
 
         Luego que llega un cliente se le asigna al primer empleado que lo pueda atender. Notar que el tercer empleado solo
         trabaja en la segunda simulación y en horarios picos. Cuando un empleado atiende a un cliente, el cliente sale del sistema y
@@ -143,14 +147,24 @@
     \section*{Consideraciones Obtenidas}
         Luego de correr varias simulaciones variando los parámetros \texttt{LAMBDA\_REGULAR} y \texttt{LAMBDA\_BUSY} se obtuvieron los siguientes resultados:
 
-        tablaaaa
+        \begin{center}
+            \begin{tabular}{ccccc}
+                \toprule
+                Simulación   & \texttt{LAMBDA\_REGULAR} & \texttt{LAMBDA\_BUSY} & Two Employees & Three Employees \\ \midrule
+                1            & 0.2                      & 0.3                   & 78.34394      & 68.71165        \\
+                2            & 0.2                      & 0.3                   & 77.84810      & 54.30463          \\
+                3            & 1                        & 0.7                   & 99.66159      & 66.25222          \\
+                4            & 0.1                      & 0.05                  & 51.51515      & 58.13953          \\
+                5            & 0.1                      & 0.05                  & 55.81395      & 44.00000          \\ \bottomrule
+            \end{tabular}
+        \end{center}
 
         Podemos notar que la cantidad de clientes que esperan más de 5 minutos es menor usando un tercer empleado. Sin embargo existen simulaciones
         en las que no es así (o están muy cercanos los porcientos), esto es entendible ya que la simulación con tres empleados pudo haber tenido más clientes
         entrando a la cocina en distintos momentos de tiempo. Claro esto es una situación pesimista, en general el modelo de tres empleados minimiza el
         tiempo de espera de los clientes.
 
-        Para más detalles sobre el modelo y ver el código que lo implementa dirigirse al repo de GitHub:
+        Para más detalles sobre el modelo, realizar simulaciones con otros parámetros lambda y ver el código que lo implementa dirigirse al repo de GitHub:
 
         \href{https://github.com/dcordb/kojos-kitchen/}{https://github.com/dcordb/kojos-kitchen/}
 \end{document}
