@@ -1,0 +1,156 @@
+\documentclass{article}
+
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{blindtext}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage[margin = 0.75in]{geometry}
+\usepackage{parskip}
+\usepackage{enumitem}
+
+% \usepackage{minted}
+
+\usepackage{sectsty}
+\allsectionsfont{\normalfont\sffamily}
+
+\author{Daniel E. Cordovés Borroto \\ \\ Email: \href{mailto:daniel.cordovesb@estudiantes.matcom.uh.cu}{daniel.cordovesb@estudiantes.matcom.uh.cu}}
+\title{Kojo's Kitchen}
+
+\begin{document}
+	\maketitle
+	\newpage
+    
+    \section*{Problema a resolver}
+        La cocina de Kojo es uno de los puestos de comida rápida en un centro
+        comercial. El centro comercial está abierto entre las 10:00 am y las 9:00 pm cada
+        dı́a.
+        
+        En este lugar se sirven dos tipos de productos: sándwiches y sushi. Para los
+        objetivos de este proyecto se asumirá que existen solo dos tipos de consumidores:
+        unos consumen solo sándwiches y los otros consumen solo productos de la gama
+        del sushi.
+        
+        En Kojo hay dos períodos de hora pico durante un día de trabajo;
+        uno entre las 11:30 am y la 1:30 pm, y el otro entre las 5:00 pm y las 7:00
+        pm. El intervalo de tiempo entre el arribo de un consumidor y el de otro no es
+        homogéneo pero, por conveniencia, se asumirá que es homogéneo. El intervalo
+        de tiempo de los segmentos homogéneos, distribuye de forma exponencial.
+
+        Actualmente dos empleados trabajan todo el dı́a preparando sándwiches y
+        sushi para los consumidores. El tiempo de preparación depende del producto en
+        1cuestión. Estos distribuyen de forma uniforme, en un rango de 3 a 5 minutos
+        para la preparación de sándwiches y entre 5 y 8 minutos para la preparación de
+        sushi.
+
+        El administrador de Kojo está muy feliz con el negocio, pero ha estado recibiendo
+        quejas de los consumidores por la demora de sus peticiones. Él está interesado
+        en explorar algunas opciones de distribución del personal para reducir
+        el número de quejas. Su interés está centrado en comparar la situación actual con
+        una opción alternativa donde se emplea un tercer empleado durante los perı́odos
+        más ocupados. La medida del desempeño de estas opciones estará dada por el
+        porciento de consumidores que espera más de 5 minutos por un servicio durante
+        el curso de un dı́a de trabajo.
+
+        Se desea obtener el porciento de consumidores que esperan más de 5 minutos
+        cuando solo dos empleados están trabajando y este mismo dato agregando un
+        empleado en las horas pico.
+
+    \section*{Solución}
+        Para darle solución a este problema se realizan dos simulaciones: una con solo dos empleados; y otra con dos empleados y un tercero
+        en los horarios pico, luego se comparan los porcientos de clientes que esperan más de 5 minutos en cada simulación para sacar
+        conclusiones sobre la eficiencia en Kojo's Kitchen.
+
+        Se tienen las siguientes variables:
+
+        De tiempo:
+
+        \begin{itemize}[label=\textbullet]
+            \item \texttt{t} (tiempo actual en el sistema)
+        \end{itemize}
+
+        Estado del sistema:
+
+        \begin{itemize}[label=\textbullet]
+            \item \texttt{n}: número de personas en el sistema (procesándose)
+            \item \texttt{who\_first}: número de cliente que está siendo atendido por el empleado 1 (0 indica que no hay cliente siendo atendido)
+            \item \texttt{who\_second}: número de cliente está siendo atendido por el empleado 2 (0 indica que no hay cliente siendo atendido)
+            \item \texttt{who\_third}: número de cliente está siendo atendido por el empleado 3 (0 indica que no hay cliente siendo atendido)
+            \item \texttt{t\_out\_1}: tiempo después del cual el cliente \texttt{who\_first} es atendido por el empleado 1 (infinito si no hay cliente siendo atendido)
+            \item \texttt{t\_out\_2}: tiempo después del cual el cliente \texttt{who\_second} es atendido por el empleado 2 (infinito si no hay cliente siendo atendido)
+            \item \texttt{t\_out\_3}: tiempo después del cual el cliente \texttt{who\_third} es atendido por el empleado 3 (infinito si no hay cliente siendo atendido)
+        \end{itemize}
+
+        Contadoras:
+
+        \begin{itemize}[label=\textbullet]
+            \item \texttt{arrivals}: cantidad de llegadas
+            \item \texttt{first\_empl\_req}: cantidad de pedidos completados por empleado 1
+            \item \texttt{second\_empl\_req}: cantidad de pedidos completados por empleado 2
+            \item \texttt{third\_empl\_req}: cantidad de pedidos completados por empleado 3
+        \end{itemize}
+
+        De salida:
+
+        \begin{itemize}[label=\textbullet]
+            \item \texttt{t\_in}: tiempo de llegada de cada cliente
+            \item \texttt{t\_out}: tiempo de salida de cada cliente
+            \item \texttt{food\_wants}: tipo de comida que quiere cada cliente
+        \end{itemize}
+
+        Los eventos serían:
+
+        \begin{itemize}[label=\textbullet]
+            \item llegada de un nuevo cliente
+            \item primer empleado terminó pedido de algún cliente
+            \item segundo empleado terminó pedido de algún cliente
+            \item tercer empleado terminó pedido de algún cliente (nota: este empleado solo trabaja en horarios pico)
+        \end{itemize}
+
+        En la solución la unidad de tiempo es minutos. Por consiguiente se reescriben los intervalos de tiempo de esta forma:
+
+        \begin{itemize}[label=\textbullet]
+            \item tiempo en que abre la cocina: \texttt{t} = 0 (10:00 am)
+            \item tiempo de inicio de primer intervalo de hora pico: \texttt{t} = 90 (11:30 am)
+            \item tiempo de finalización de primer intervalo de hora pico: \texttt{t} = 90 + 120 (1:30 pm)
+            \item tiempo de inicio de segundo intervalo de hora pico: \texttt{t} = 7 * 60 (5:00 pm)
+            \item tiempo de finalización de segundo intervalo de hora pico: \texttt{t} = 7 * 60 + 120 (7:00 pm)
+            \item tiempo de cierre de la cocina: \texttt{t} = 11 * 60 (9:00 pm)
+        \end{itemize}
+
+        Las llegadas de un nuevo cliente se realizan de la siguiente forma: se genera una variable con distribución exponencial
+        que denota que a partir del tiempo actual (\texttt{t}) entra un nuevo cliente en G minutos (el tiempo de entrada sería \texttt{t + G}),
+        donde \texttt{G} es la variable generada.
+
+        Como hay intervalos de tiempo de hora pico e intervalos de tiempo regulares se tienen dos lambdas distintos para generar
+        estas variables:
+            \begin{itemize}[label=\textbullet]
+                \item \texttt{LAMBDA\_REGULAR} (lambda a usar en intervalos regulares)
+                \item \texttt{LAMDA\_BUSY} (lambda a usar en intervalos de hora pico)
+            \end{itemize}
+
+        Luego que llega un cliente se le asigna al primer empleado que lo pueda atender. Notar que el tercer empleado solo
+        trabaja en la segunda simulación y en horarios picos. Cuando un empleado atiende a un cliente, el cliente sale del sistema y
+        el empleado se le asigna un nuevo cliente, en particular, se le asigna el cliente $\max($\texttt{who\_first}$,$ \texttt{who\_second}$,$ \texttt{who\_third}$) + 1$.
+
+        El tiempo que un cliente $i$ tuvo que esperar hasta recibir su comida es de \texttt{t\_out[i]} - \texttt{t\_in[i]}, queremos en cada simulación
+        hallar el porciento de clientes cuyo tiempo de espera es mayor que 5 minutos.
+
+    \section*{Pseudocódigo}
+            asdasdsadsad
+
+    \section*{Consideraciones Obtenidas}
+        Luego de correr varias simulaciones variando los parámetros \texttt{LAMBDA\_REGULAR} y \texttt{LAMBDA\_BUSY} se obtuvieron los siguientes resultados:
+
+        tablaaaa
+
+        Podemos notar que la cantidad de clientes que esperan más de 5 minutos es menor usando un tercer empleado. Sin embargo existen simulaciones
+        en las que no es así (o están muy cercanos los porcientos), esto es entendible ya que la simulación con tres empleados pudo haber tenido más clientes
+        entrando a la cocina en distintos momentos de tiempo. Claro esto es una situación pesimista, en general el modelo de tres empleados minimiza el
+        tiempo de espera de los clientes.
+
+        Para más detalles sobre el modelo y ver el código que lo implementa dirigirse al repo de GitHub:
+
+        \href{https://github.com/dcordb/kojos-kitchen/}{https://github.com/dcordb/kojos-kitchen/}
+\end{document}
